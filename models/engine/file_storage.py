@@ -1,5 +1,11 @@
 import json
 from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 
 
 # This class likely represents a file storage system in Python.
@@ -11,7 +17,7 @@ class FileStorage:
         """
         This function is named "all" and it seems like the comment section is empty.
         """
-        return self.__objects
+        return FileStorage.__objects
 
     def new(self, obj):
         """
@@ -21,31 +27,27 @@ class FileStorage:
         parameter `obj`. If you need any assistance with completing the method or have any specific
         questions, feel free to ask!
         """
-        key = "{}.{}".format(obj.__class__.__name__, obj.id)
-        self.__objects[key] = obj
+        key = obj.__class__.__name__ + "." + obj.id
+        FileStorage.__objects[key] = obj
 
     def save(self):
         """
         This function is used to save data or changes made within the class instance.
         """
-        serialized_objects = {
-            key: obj.to_dict() for key, obj in self.__objects.items()
-        }
-        with open(self.__file_path, 'w') as file:
-            json.dump(serialized_objects, file)
+        serializable_dict = {key: obj.to_dict() for key, obj in FileStorage.__objects.items()}
+        with open(FileStorage.__file_path, mode="w", encoding="utf-8") as file:
+            json.dump(serializable_dict, file)
 
     def reload(self):
         """
         This function is used to reload a module or package in Python.
         """
         try:
-            with open(self.__file_path, 'r') as file:
-                serialized_objects = json.load(file)
-                for key, obj_dict in serialized_objects.items():
-                    class_name, obj_id = key.split('.')
-                    # Dynamically create an instance of the corresponding class
-                    cls = eval(class_name)
-                    obj = cls(**obj_dict)
-                    self.__objects[key] = obj
+            with open(FileStorage.__file_path, "r") as file:
+                json_dict = json.load(file)
+            for key, value in json_dict.items():
+                cls_name, obj_id = key.split('.')
+                cls = eval(cls_name)
+                FileStorage.__objects[key] = cls(**value)
         except FileNotFoundError:
             pass
