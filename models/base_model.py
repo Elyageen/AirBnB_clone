@@ -13,21 +13,27 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize instance attributes.
+        Initializes an instance of BaseModel.
 
         Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
+            *args: Unused.
+            **kwargs: Dictionary of key-value pairs representing instance attributes.
+                - If not empty, each key is an attribute name and each value is the value of that attribute.
+                - If empty, id and created_at attributes are created as usual.
+
         """
         if kwargs:
+            DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+
             for key, value in kwargs.items():
-                if key == 'created_at' or key == 'updated_at':
-                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                if key != '__class__':
+                if key in ["created_at", "updated_at"]:
+                    setattr(self, key, datetime.strptime(value, DATE_TIME_FORMAT))
+                elif key != "__class__":
                     setattr(self, key, value)
         else:
-            self.my_number = str(uuid.uuid4())
-            self.created_at = self.updated_at = datetime.now()
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
 
     def __str__(self):
         """
