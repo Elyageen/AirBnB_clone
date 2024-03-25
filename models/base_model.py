@@ -1,7 +1,3 @@
-#!/usr/bin/python3
-"""
-Module: base_model.py
-"""
 from datetime import datetime
 import uuid
 
@@ -49,6 +45,9 @@ class BaseModel:
         Update the attribute updated_at with the current datetime.
         """
         self.updated_at = datetime.now()
+        from models import storage  # Import storage here to avoid circular import
+        storage.new(self)
+        storage.save()
 
     def to_dict(self):
         """
