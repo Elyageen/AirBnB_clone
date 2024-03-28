@@ -1,110 +1,114 @@
-# console.py
-
+#!/usr/bin/python3
+"""The console module."""
 import cmd
+from models import storage
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
 from models.city import City
-from models.place import Place
 from models.amenity import Amenity
+from models.place import Place
 from models.review import Review
-from models.engine.file_storage import FileStorage
-
-classes = {"BaseModel": BaseModel, "User": User, "State": State,
-           "City": City, "Place": Place, "Amenity": Amenity,
-           "Review": Review}
 
 
 class HBNBCommand(cmd.Cmd):
+    """The console class."""
     prompt = "(hbnb) "
 
-    def do_quit(self, arg):
-        return True
-
-    def do_EOF(self, arg):
-        print("")
-        return True
-
     def emptyline(self):
+        """Do nothing when empty line is entered."""
         pass
 
+    def do_quit(self, line):
+        """Quit command to exit the program."""
+        return True
+
+    def do_EOF(self, line):
+        """Handle EOF."""
+        return True
+
     def do_create(self, arg):
+        """Create a new instance of BaseModel, save it, and print the id."""
         if not arg:
             print("** class name missing **")
             return
-        args = arg.split()
-        if args[0] not in classes:
+        try:
+            new_instance = eval(arg)()
+            new_instance.save()
+            print(new_instance.id)
+        except NameError:
             print("** class doesn't exist **")
-            return
-        new_instance = classes[args[0]]()
-        new_instance.save()
-        print(new_instance.id)
 
     def do_show(self, arg):
+        """Prints the string representation of an instance."""
+        args = arg.split()
         if not arg:
             print("** class name missing **")
             return
-        args = arg.split()
-        if args[0] not in classes:
+        if args[0] not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
             return
         if len(args) < 2:
             print("** instance id missing **")
             return
-        key = args[0] + "." + args[1]
-        objs = FileStorage().all()
-        if key in objs:
-            print(objs[key])
+        obj = storage.all()
+        key = "{}.{}".format(args[0], args[1])
+        if key in obj:
+            print(obj[key])
         else:
             print("** no instance found **")
 
     def do_destroy(self, arg):
+        """Deletes an instance."""
+        args = arg.split()
         if not arg:
             print("** class name missing **")
             return
-        args = arg.split()
-        if args[0] not in classes:
+        if args[0] not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
             return
         if len(args) < 2:
             print("** instance id missing **")
             return
-        key = args[0] + "." + args[1]
-        objs = FileStorage().all()
-        if key in objs:
-            del objs[key]
-            FileStorage.save()
+        obj = storage.all()
+        key = "{}.{}".format(args[0], args[1])
+        if key in obj:
+            del obj[key]
+            storage.save()
         else:
             print("** no instance found **")
 
     def do_all(self, arg):
-        objs = FileStorage().all()
+        """Prints all string representations of all instances."""
+        args = arg.split()
+        obj_list = []
         if not arg:
-            for obj in objs.values():
-                print(obj)
+            for key, value in storage.all().items():
+                obj_list.append(str(value))
+        elif args[0] in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
+            for key, value in storage.all().items():
+                if args[0] in key:
+                    obj_list.append(str(value))
         else:
-            args = arg.split()
-            if args[0] not in classes:
-                print("** class doesn't exist **")
-                return
-            filtered_objs = [v for k, v in objs.items() if k.startswith(args[0])]
-            for obj in filtered_objs:
-                print(obj)
+            print("** class doesn't exist **")
+            return
+        print(obj_list)
 
     def do_update(self, arg):
+        """Updates an instance based on the class name and id."""
+        args = arg.split()
         if not arg:
             print("** class name missing **")
             return
-        args = arg.split()
-        if args[0] not in classes:
+        if args[0] not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
             print("** class doesn't exist **")
             return
         if len(args) < 2:
             print("** instance id missing **")
             return
-        key = args[0] + "." + args[1]
-        objs = FileStorage().all()
-        if key not in objs:
+        obj = storage.all()
+        key = "{}.{}".format(args[0], args[1])
+        if key not in obj:
             print("** no instance found **")
             return
         if len(args) < 3:
@@ -113,9 +117,38 @@ class HBNBCommand(cmd.Cmd):
         if len(args) < 4:
             print("** value missing **")
             return
-        setattr(objs[key], args[2], args[3])
-        objs[key].save()
+        obj_instance = obj[key]
+        setattr(obj_instance, args[2], args[3])
+        obj_instance.save()
+
+    def do_User(self, arg):
+        """Retrieve all instances of User class."""
+        self.do_all("User")
+
+    def do_BaseModel(self, arg):
+        """Retrieve all instances of BaseModel class."""
+        self.do_all("BaseModel")
+
+    def do_State(self, arg):
+        """Retrieve all instances of State class."""
+        self.do_all("State")
+
+    def do_City(self, arg):
+        """Retrieve all instances of City class."""
+        self.do_all("City")
+
+    def do_Amenity(self, arg):
+        """Retrieve all instances of Amenity class."""
+        self.do_all("Amenity")
+
+    def do_Place(self, arg):
+        """Retrieve all instances of Place class."""
+        self.do_all("Place")
+
+    def do_Review(self, arg):
+        """Retrieve all instances of Review class."""
+        self.do_all("Review")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HBNBCommand().cmdloop()
