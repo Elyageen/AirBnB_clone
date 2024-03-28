@@ -51,10 +51,10 @@ class HBNBCommand(cmd.Cmd):
         if len(args) < 2:
             print("** instance id missing **")
             return
-        obj = storage.all()
+        obj_dict = storage.all()
         key = "{}.{}".format(args[0], args[1])
-        if key in obj:
-            print(obj[key])
+        if key in obj_dict:
+            print(obj_dict[key])
         else:
             print("** no instance found **")
 
@@ -159,11 +159,12 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
             return
         count = 0
-        obj = storage.all()
-        for key in obj:
-            if args[0] in key:
+        obj_dict = storage.all()
+        for key, value in obj_dict.items():
+            class_name = key.split('.')[0]
+            if class_name == args[0]:
                 count += 1
-        print(count)
+        # print(count)
 
 
 if __name__ == '__main__':
