@@ -1,53 +1,57 @@
+# models/engine/file_storage.py
+
 import json
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
 from models.city import City
-from models.amenity import Amenity
 from models.place import Place
+from models.amenity import Amenity
 from models.review import Review
 
 
-# This class likely represents a file storage system in Python.
 class FileStorage:
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
-        """
-        This function is named "all" and it seems like the comment section is empty.
-        """
+        """Returns the dictionary __objects"""
         return FileStorage.__objects
 
     def new(self, obj):
-        """
-        This function is a constructor method that initializes a new object with the given input.
-        
-        :param obj: It looks like you have started defining a method called `new` that takes in a
-        parameter `obj`. If you need any assistance with completing the method or have any specific
-        questions, feel free to ask!
-        """
-        key = obj.__class__.__name__ + "." + obj.id
+        """Sets in __objects the obj with key <obj class name>.id"""
+        key = "{}.{}".format(obj.__class__.__name__, obj.id)
         FileStorage.__objects[key] = obj
 
     def save(self):
-        """
-        This function is used to save data or changes made within the class instance.
-        """
-        serializable_dict = {key: obj.to_dict() for key, obj in FileStorage.__objects.items()}
-        with open(FileStorage.__file_path, mode="w", encoding="utf-8") as file:
-            json.dump(serializable_dict, file)
+        """Serializes __objects to the JSON file (path: __file_path)"""
+        new_dict = {}
+        for key, value in FileStorage.__objects.items():
+            new_dict[key] = value.to_dict()
+        with open(FileStorage.__file_path, 'w') as f:
+            json.dump(new_dict, f)
 
     def reload(self):
-        """
-        This function is used to reload a module or package in Python.
-        """
+        """Deserializes the JSON file to __objects (only if the JSON file (__file_path) exists;
+        otherwise, do nothing. If the file doesn’t exist, no exception should be raised)"""
         try:
-            with open(FileStorage.__file_path, "r") as file:
-                json_dict = json.load(file)
-            for key, value in json_dict.items():
-                cls_name, obj_id = key.split('.')
-                cls = eval(cls_name)
-                FileStorage.__objects[key] = cls(**value)
+            with open(FileStorage.__file_path, 'r') as f:
+                obj_dict = json.load(f)
+                for key, value in obj_dict.items():
+                    class_name = key.split('.')[0]
+                    if class_name == "BaseModel":
+                        FileStorage.__objects[key] = BaseModel(**value)
+                    elif class_name == "User":
+                        FileStorage.__objects[key] = User(**value)
+                    elif class_name == "State":
+                        FileStorage.__objects[key] = State(**value)
+                    elif class_name == "City":
+                        FileStorage.__objects[key] = City(**value)
+                    elif class_name == "Place":
+                        FileStorage.__objects[key] = Place(**value)
+                    elif class_name == "Amenity":
+                        FileStorage.__objects[key] = Amenity(**value)
+                    elif class_name == "Review":
+                        FileStorage.__objects[key] = Review(**value)
         except FileNotFoundError:
             pass

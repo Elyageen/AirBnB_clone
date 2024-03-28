@@ -30,7 +30,12 @@ class BaseModel:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.utcnow()
             self.updated_at = datetime.utcnow()
-
+    
+    @classmethod
+    def count(cls):
+        """Returns the number of instances of the class."""
+        return len(cls.__objects)
+    
     def __str__(self):
         """
         Return the string representation of BaseModel instance.
