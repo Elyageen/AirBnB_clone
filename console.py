@@ -149,6 +149,22 @@ class HBNBCommand(cmd.Cmd):
         """Retrieve all instances of Review class."""
         self.do_all("Review")
 
+    def do_count(self, arg):
+        """Count the instances of a class."""
+        args = arg.split()
+        if not arg:
+            print("** class name missing **")
+            return
+        if args[0] not in ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]:
+            print("** class doesn't exist **")
+            return
+        count = 0
+        obj = storage.all()
+        for key in obj:
+            if args[0] in key:
+                count += 1
+        print(count)
+
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
