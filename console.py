@@ -13,7 +13,11 @@ class HBNBCommand(cmd.Cmd):
     Command interpreter for HBNB project.
     """
     prompt = '(hbnb) '
-
+    
+    @classmethod
+    def count(cls):
+        """Returns the number of instances of the class."""
+        return len(cls.__objects)
     def do_quit(self, arg):
         """
         Quit command to exit the program
